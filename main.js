@@ -3,6 +3,7 @@ let background, backX = 0, backY = 0, backX2 = backSize = 1890;
 let pl_x = 30, pl_y = height / 2 - 70, score = 0, best_score = 0;
 let shotKey = false, rightKey = false, leftKey = false, upKey = false, downKey = false;
 let bulletsTotal = 10, bullets = [];
+let enemyTotal = 10, enemies = [], en_w = 80, en_h = 80;
 
 function keyDown(e) {
     if (e.keyCode === 39 || e.keyCode === 68) rightKey = true;
@@ -131,6 +132,33 @@ class bullet {
     }
 }
 
+class enemy {
+    constructor(x, y, w, h) {
+        this.x = x;
+        this.y = y;
+        this.width = w;
+        this.height = h;
+        this.lives = 20;
+        this.img = new Image();
+        this.img.src = 'images/enemy_sprites.png';
+        this.curFrame = 0;
+        this.frameCount = 6;
+        this.srcX = 0;
+        this.fps = 0;
+    }
+
+    draw() {
+        ctx.drawImage(this.img, this.srcX, 0, this.width, this.height, this.x, this.y, this.width, this.height);
+
+        if (this.fps === 6) {
+            this.curFrame = ++this.curFrame % this.frameCount;
+            this.srcX = this.curFrame * this.width;
+            this.fps = 0;
+        }
+        ++this.fps;
+    }
+}
+
 function drawBullets() {
     if (bullets.length) {
         for (let i = 0; i < bullets.length; i++) {
@@ -150,7 +178,28 @@ function moveBullets() {
     }
 }
 
+function drawEnemies() {
+    for (let i = 0; i < enemies.length; i++) {
+        enemies[i].draw();
+    }
+}
+
+
+function moveEnemies() {
+    for (let i = 0; i < enemies.length; i++) {
+        if (enemies[i].x >= -en_w) {
+            enemies[i].x -= 2;
+        } else if (enemies[i].x < -en_w) {
+            enemies[i].x = width + en_w;
+            enemies[i].y = getRandom(0, height - en_h);
+        }
+    }
+}
+
 let gamer = new player(pl_x, pl_y);
+for (let i = 0; i < enemyTotal; i++) {
+    enemies.push(new enemy(width + getRandom(en_w, 1000), getRandom(0, height - en_h), en_w, en_h, 20));
+}
 
 function gameLoop() {
     ctx.clearRect(0, 0, width, height);
@@ -158,6 +207,8 @@ function gameLoop() {
     gamer.draw();
     drawBullets();
     moveBullets();
+    drawEnemies();
+    moveEnemies();
     setTimeout(gameLoop, 1000 / 60);
 }
 
