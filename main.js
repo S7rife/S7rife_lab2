@@ -5,7 +5,7 @@ let canvas, ctx, width = window.innerWidth, height = 480;
 let background, backX = 0, backY = 0, backX2 = backSize = 1890;
 let pl_x = 30, pl_y = height / 2 - 70, score = 0, best_score = 0;
 let shotKey = false, rightKey = false, leftKey = false, upKey = false, downKey = false;
-let bulletsTotal = 10, bullets = [];
+let bulletsTotal = 20, bullets = [];
 let enemyTotal = 10, enemies = [], en_w = 80, en_h = 80;
 let weInSelect = false, weInStart = true, weInLose = false, wePlaying = false;
 let godMode = false, gameFrequency = 0;
@@ -78,6 +78,14 @@ class player {
         this.gCurFrame = 0;
         this.gFrameCount = 3;
         this.srcXg = 0;
+
+        this.god = new Image();
+        this.god.src = 'images/god_sprite.png';
+        this.godWidth = 207;
+        this.godHeight = 213;
+        this.godCurFrame = 0;
+        this.godFrameCount = 4;
+        this.srcXgod = 0;
     }
 
     draw() {
@@ -99,16 +107,34 @@ class player {
 
         ++this.fps;
         if (this.fps === 6) {
-            this.curFrame = ++this.curFrame % this.frameCount;
-            this.srcX = this.curFrame * this.width;
+            if (godMode){
+                this.godCurFrame = ++this.godCurFrame % this.godFrameCount;
+                this.srcXgod = this.godCurFrame * this.godWidth;
+            }else {
+                this.curFrame = ++this.curFrame % this.frameCount;
+                this.srcX = this.curFrame * this.width;
 
-            this.gCurFrame = ++this.gCurFrame % this.gFrameCount;
-            this.srcXg = this.gCurFrame * this.gunWidth;
+                this.gCurFrame = ++this.gCurFrame % this.gFrameCount;
+                this.srcXg = this.gCurFrame * this.gunWidth;
+            }
             this.fps = 0;
         }
 
-        ctx.drawImage(this.img, this.srcX, 0, this.width, this.height, this.x, this.y, this.width, this.height);
-        if (wePlaying) ctx.drawImage(this.gun, this.srcXg, 0, this.gunWidth, this.gunHeight, this.gunX, this.gunY, this.gunWidth - 60, this.gunHeight - 45);
+
+
+        if (wePlaying) {
+            if (godMode){
+                this.gunX = pl_x + 20;
+                this.gunY = pl_y + 10;
+                this.x = pl_x;
+                this.y = pl_y;
+                ctx.drawImage(this.god, this.srcXgod, 0, this.godWidth, this.godHeight, -100, 0, this.godWidth * 2.2, this.godHeight * 2.2);
+
+            }else{
+                ctx.drawImage(this.img, this.srcX, 0, this.width, this.height, this.x, this.y, this.width, this.height);
+                ctx.drawImage(this.gun, this.srcXg, 0, this.gunWidth, this.gunHeight, this.gunX, this.gunY, this.gunWidth - 60, this.gunHeight - 45);
+            }
+        }
     }
 }
 
@@ -280,7 +306,6 @@ function Buttons(e) {
         }
 
         gamer.lives = 100;
-        if (score > best_score) best_score = score;
         score = 0;
     }
 }
@@ -381,14 +406,49 @@ function hitTest() {
     }
 }
 
+function checkCollision() {
+    let ship_xw = gamer.x + gamer.width, ship_yh = gamer.y + gamer.height;
+    for (let i = 0; i < enemies.length; i++) {
+        if (gamer.x > enemies[i].x && gamer.x < enemies[i].x + en_w && gamer.y > enemies[i].y && gamer.y < enemies[i].y + en_h) {
+            checkLives();
+        }
+        if (ship_xw < enemies[i].x + en_w && ship_xw > enemies[i].x && gamer.y > enemies[i].y && gamer.y < enemies[i].y + en_h) {
+            checkLives();
+        }
+        if (ship_yh > enemies[i].y && ship_yh < enemies[i].y + en_h && gamer.x > enemies[i].x && gamer.x < enemies[i].x + en_w) {
+            checkLives();
+        }
+        if (ship_yh > enemies[i].y && ship_yh < enemies[i].y + en_h && ship_xw < enemies[i].x + en_w && ship_xw > enemies[i].x) {
+            checkLives();
+        }
+    }
+}
+
 function autoShot() {
+    let posY = gamer.y;
     let shot = 30;
-    if (godMode) shot = 10;
+    if (godMode) {
+        shot = 5;
+        posY = getRandom(-20, 420);
+    }
     if (bullets.length <= bulletsTotal && gameFrequency % shot === 0) {
-        bullets.push(new bullet(gamer.x, gamer.y))
+        bullets.push(new bullet(gamer.x, posY))
         shotKey = false;
     }
     shotKey = true;
+}
+
+function checkLives() {
+
+    if (!godMode && gamer.lives > 25) {
+        gamer.lives -= 25;
+        godMode = true;
+
+    } else if (!godMode && gamer.lives <= 25) {
+        if (score > best_score) best_score = score;
+        wePlaying = false;
+        weInLose = true;
+    }
 }
 
 let menuAndElements = new gameElements();
@@ -405,12 +465,13 @@ function gameLoop() {
     menuAndElements.draw();
     if (wePlaying && gamer.lives > 0) {
         document.body.style.cursor = 'none';
+        checkCollision();
         drawBullets();
         moveBullets();
         drawEnemies();
         moveEnemies();
         hitTest();
-        if (touchControl) autoShot();
+        if (touchControl || godMode) autoShot();
         if (godMode) {
             if (gameFrequency % 500 === 0) godMode = false;
         }
