@@ -2,13 +2,19 @@ let canvas, ctx, width = window.innerWidth, height = 480;
 let background, backX = 0, backY = 0, backX2 = backSize = 1890;
 let pl_x = 30, pl_y = height / 2 - 70, score = 0, best_score = 0;
 let shotKey = false, rightKey = false, leftKey = false, upKey = false, downKey = false;
+let bulletsTotal = 10, bullets = [];
 
 function keyDown(e) {
     if (e.keyCode === 39 || e.keyCode === 68) rightKey = true;
     else if (e.keyCode === 37 || e.keyCode === 65) leftKey = true;
     if (e.keyCode === 38 || e.keyCode === 87) upKey = true;
     else if (e.keyCode === 40 || e.keyCode === 83) downKey = true;
-    if (e.keyCode === 77 || e.keyCode === 88) shotKey = true;
+    if (e.keyCode === 77 || e.keyCode === 88) { // M / X
+        shotKey = true;
+        if (bullets.length <= bulletsTotal) {
+            bullets.push(new bullet(gamer.x, gamer.y))
+        }
+    }
 }
 
 
@@ -96,12 +102,62 @@ class player {
     }
 }
 
+class bullet {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.width = 256;
+        this.height = 102;
+        this.attackX = x + 256 - (256 / 5);
+        this.attackY = y + (102 / 2);
+        this.bul = new Image();
+        this.bul.src = 'images/bullet_sprites.png';
+        this.curFrame = 0;
+        this.frameCount = 10;
+        this.srcX = 0;
+        this.fps = 0;
+    }
+
+    draw() {
+        ++this.fps;
+        this.attackX = this.x + this.width / 2;
+        this.attackY = this.y + this.height / 2;
+        if (this.fps === 4) {
+            this.curFrame = ++this.curFrame % this.frameCount;
+            this.srcX = this.curFrame * this.width;
+            this.fps = 0;
+        }
+        ctx.drawImage(this.bul, this.srcX, 0, this.width, this.height, this.x, this.y, this.width, this.height);
+    }
+}
+
+function drawBullets() {
+    if (bullets.length) {
+        for (let i = 0; i < bullets.length; i++) {
+            bullets[i].draw();
+        }
+    }
+}
+
+
+function moveBullets() {
+    for (let i = 0; i < bullets.length; i++) {
+        if (bullets[i].x < width + 100) {
+            bullets[i].x += 8;
+        } else if (bullets[i].x > width + 100) {
+            bullets.splice(i, 1);
+        }
+    }
+}
+
 let gamer = new player(pl_x, pl_y);
 
 function gameLoop() {
     ctx.clearRect(0, 0, width, height);
     drawBackground();
     gamer.draw();
+    drawBullets();
+    moveBullets();
     setTimeout(gameLoop, 1000 / 60);
 }
 
