@@ -1,4 +1,6 @@
 let touchControl = false;
+if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) touchControl = true;
+
 let canvas, ctx, width = window.innerWidth, height = 480;
 let background, backX = 0, backY = 0, backX2 = backSize = 1890;
 let pl_x = 30, pl_y = height / 2 - 70, score = 0, best_score = 0;
@@ -6,27 +8,32 @@ let shotKey = false, rightKey = false, leftKey = false, upKey = false, downKey =
 let bulletsTotal = 10, bullets = [];
 let enemyTotal = 10, enemies = [], en_w = 80, en_h = 80;
 let weInSelect = false, weInStart = true, weInLose = false, wePlaying = false;
+let godMode = false, gameFrequency = 0;
 
 function keyDown(e) {
-    if (e.keyCode === 39 || e.keyCode === 68) rightKey = true;
-    else if (e.keyCode === 37 || e.keyCode === 65) leftKey = true;
-    if (e.keyCode === 38 || e.keyCode === 87) upKey = true;
-    else if (e.keyCode === 40 || e.keyCode === 83) downKey = true;
-    if (e.keyCode === 77 || e.keyCode === 88) { // M / X
-        shotKey = true;
-        if (bullets.length <= bulletsTotal) {
-            bullets.push(new bullet(gamer.x, gamer.y))
+    if (wePlaying && !touchControl) {
+        if (e.keyCode === 39 || e.keyCode === 68) rightKey = true;
+        else if (e.keyCode === 37 || e.keyCode === 65) leftKey = true;
+        if (e.keyCode === 38 || e.keyCode === 87) upKey = true;
+        else if (e.keyCode === 40 || e.keyCode === 83) downKey = true;
+        if (e.keyCode === 77 || e.keyCode === 88) { // M / X
+            shotKey = true;
+            if (bullets.length <= bulletsTotal) {
+                bullets.push(new bullet(gamer.x, gamer.y))
+            }
         }
     }
 }
 
 
 function keyUp(e) {
-    if (e.keyCode === 39 || e.keyCode === 68) rightKey = false;
-    else if (e.keyCode === 37 || e.keyCode === 65) leftKey = false;
-    if (e.keyCode === 38 || e.keyCode === 87) upKey = false;
-    else if (e.keyCode === 40 || e.keyCode === 83) downKey = false;
-    if (e.keyCode === 77 || e.keyCode === 88) shotKey = false;
+    if (wePlaying && !touchControl) {
+        if (e.keyCode === 39 || e.keyCode === 68) rightKey = false;
+        else if (e.keyCode === 37 || e.keyCode === 65) leftKey = false;
+        if (e.keyCode === 38 || e.keyCode === 87) upKey = false;
+        else if (e.keyCode === 40 || e.keyCode === 83) downKey = false;
+        if (e.keyCode === 77 || e.keyCode === 88) shotKey = false;
+    }
 }
 
 
@@ -101,7 +108,7 @@ class player {
         }
 
         ctx.drawImage(this.img, this.srcX, 0, this.width, this.height, this.x, this.y, this.width, this.height);
-        ctx.drawImage(this.gun, this.srcXg, 0, this.gunWidth, this.gunHeight, this.gunX, this.gunY, this.gunWidth - 60, this.gunHeight - 45);
+        if (wePlaying) ctx.drawImage(this.gun, this.srcXg, 0, this.gunWidth, this.gunHeight, this.gunX, this.gunY, this.gunWidth - 60, this.gunHeight - 45);
     }
 }
 
@@ -374,6 +381,16 @@ function hitTest() {
     }
 }
 
+function autoShot() {
+    let shot = 30;
+    if (godMode) shot = 10;
+    if (bullets.length <= bulletsTotal && gameFrequency % shot === 0) {
+        bullets.push(new bullet(gamer.x, gamer.y))
+        shotKey = false;
+    }
+    shotKey = true;
+}
+
 let menuAndElements = new gameElements();
 let gamer = new player(pl_x, pl_y);
 for (let i = 0; i < enemyTotal; i++) {
@@ -382,14 +399,23 @@ for (let i = 0; i < enemyTotal; i++) {
 
 function gameLoop() {
     ctx.clearRect(0, 0, width, height);
+    document.body.style.cursor = 'default';
     drawBackground();
     gamer.draw();
     menuAndElements.draw();
-    drawBullets();
-    moveBullets();
-    drawEnemies();
-    moveEnemies();
-    hitTest();
+    if (wePlaying && gamer.lives > 0) {
+        document.body.style.cursor = 'none';
+        drawBullets();
+        moveBullets();
+        drawEnemies();
+        moveEnemies();
+        hitTest();
+        if (touchControl) autoShot();
+        if (godMode) {
+            if (gameFrequency % 500 === 0) godMode = false;
+        }
+    }
+    gameFrequency < 10000 ? gameFrequency++ : gameFrequency = 0;
     setTimeout(gameLoop, 1000 / 60);
 }
 
