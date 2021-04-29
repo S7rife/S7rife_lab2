@@ -1,9 +1,11 @@
+let touchControl = false;
 let canvas, ctx, width = window.innerWidth, height = 480;
 let background, backX = 0, backY = 0, backX2 = backSize = 1890;
 let pl_x = 30, pl_y = height / 2 - 70, score = 0, best_score = 0;
 let shotKey = false, rightKey = false, leftKey = false, upKey = false, downKey = false;
 let bulletsTotal = 10, bullets = [];
 let enemyTotal = 10, enemies = [], en_w = 80, en_h = 80;
+let weInSelect = false, weInStart = true, weInLose = false, wePlaying = false;
 
 function keyDown(e) {
     if (e.keyCode === 39 || e.keyCode === 68) rightKey = true;
@@ -159,6 +161,160 @@ class enemy {
     }
 }
 
+class gameElements {
+    constructor() {
+        this.center = width / 2;
+        this.menuX = width / 2 - 341;
+        this.menuWidth = 682;
+        this.menuHeight = 480;
+        this.startMenu = new Image();
+        this.startMenu.src = 'images/startMenu.png';
+        this.selectMenu = new Image();
+        this.selectMenu.src = 'images/selectMenu.png';
+        this.loseMenu = new Image();
+        this.loseMenu.src = 'images/loseMenu.png';
+        this.elements = new Image();
+        this.elements.src = 'images/elements.png';
+        this.el_width = 197;
+        this.live_height = 54;
+        this.score_height = 95;
+        this.newGameB = new Image();
+        this.newGameB.src = 'images/newGame.png';
+    }
+
+    draw() {
+        ctx.font = 'normal 40px VT323';
+
+        if (!wePlaying) {
+            if (weInStart) {
+                ctx.drawImage(this.startMenu, 0, 0, this.menuWidth - 2, height, this.menuX, 0, this.menuWidth, this.menuHeight);
+                ctx.drawImage(this.elements, 0, 415, this.el_width, 60, this.center - this.el_width / 2 - 50, height / 2, this.el_width + 100, 110);
+                ctx.fillStyle = '#5f0d72';
+                ctx.fillText("Best score: ", this.center - 100, height / 2 - 50);
+                ctx.fillText(best_score, this.center + 80, height / 2 - 50);
+
+            } else if (weInSelect) {
+                ctx.drawImage(this.selectMenu, 0, 0, this.menuWidth - 2, height, this.menuX, 0, this.menuWidth, this.menuHeight);
+
+                ctx.fillStyle = '#570c69';
+                ctx.fillText("shooting: auto", this.menuX, height / 2 - 100);
+                ctx.fillText("movement: mouse/touchpad/touchscreen", this.menuX, height / 2 - 70);
+
+                ctx.fillText("↓↑→←\\dsaw :tnemevom", this.center - 20, height - 65);
+                ctx.fillText("x\\m :gnitoohs", this.center + 132, height - 35);
+
+
+            } else if (weInLose) {
+                ctx.drawImage(this.loseMenu, 0, 0, this.menuWidth - 2, height, this.menuX, 0, this.menuWidth, this.menuHeight);
+                ctx.drawImage(this.elements, 0, 95, this.el_width, 75, this.center - this.el_width / 2, height / 2 + 125, this.el_width, 75);
+                ctx.drawImage(this.newGameB, 0, 0, 300, 70, this.center - 150, height / 2 + 50, 300, 70);
+                ctx.fillStyle = '#ff00f9';
+                ctx.fillText("Best score: ", this.center - 100, height / 2 - 10);
+                ctx.fillText(best_score, this.center + 80, height / 2 - 10);
+                ctx.fillStyle = '#00c3e5';
+                ctx.fillText("Your score: ", this.center - 100, height / 2 + 30);
+                ctx.fillText(score, this.center + 80, height / 2 + 30);
+            }
+
+        } else {
+            let k = 0;
+            if (gamer.lives !== 100) k = 4 - ~~(gamer.lives / 25);
+            ctx.drawImage(this.elements, 0, (k * this.live_height) + 480, this.el_width, this.live_height, 0, 0, this.el_width - 80, this.live_height - 15);
+            ctx.drawImage(this.elements, 0, 0, this.el_width, this.score_height, 90, 0, 100, 40);
+            ctx.font = 'normal 40px VT323';
+            ctx.fillText(score, 185, 30);
+        }
+    }
+}
+
+function Buttons(e) {
+    let pos = getCursorPos(e);
+    let x = pos.x, y = pos.y;
+
+    if (wePlaying) return false;
+
+    else if (weInStart && x > width / 2 - 120 && x < width / 2 + 120 && y > height / 2 + 15 && y < height / 2 + 95) {
+        weInStart = false;
+        enemies = [];
+        for (let i = 0; i < enemyTotal; i++) {
+            enemies.push(new enemy(width + getRandom(en_w, 1000), getRandom(0, height - en_h), en_w, en_h, 20));
+        }
+        touchControl ? wePlaying = true : weInSelect = true;
+
+    } else if (weInSelect) {
+        let y1 = 187, y2 = 380, x0 = menuAndElements.center - menuAndElements.menuWidth / 2;
+
+        if (y > y1 && y < y2) {
+            if (x > x0 + 100 && x < x0 + 300) {
+                touchControl = true;
+                weInSelect = false;
+                wePlaying = true;
+
+            } else if (x > x0 + 380 && x < x0 + 580) {
+                touchControl = false;
+                weInSelect = false;
+                wePlaying = true;
+            }
+        }
+
+    } else if (weInLose) {
+        let center = menuAndElements.center;
+        if (x > center - 141 && x < center + 141 && y > height / 2 + 60 && y < height / 2 + 110) {
+            wePlaying = true;
+            weInLose = false;
+            enemies = [];
+            for (let i = 0; i < enemyTotal; i++) {
+                enemies.push(new enemy(width + getRandom(en_w, 1000), getRandom(0, height - en_h), en_w, en_h, 20));
+            }
+
+        } else if (x > center - 80 && x < center + 80 && y > height / 2 + 133 && y < height / 2 + 185) {
+            weInStart = true;
+            weInLose = false;
+        }
+
+        gamer.lives = 100;
+        if (score > best_score) best_score = score;
+        score = 0;
+    }
+}
+
+function mouseMoveHandler(e) {
+    let pos = getCursorPos(e);
+    let x = pos.x, y = pos.y;
+    let w = gamer.width, h = gamer.height;
+
+    if (wePlaying) {
+        if (touchControl) {
+
+            if (x < width - w / 2 && x > w / 2) {
+                gamer.x = x - gamer.width / 2;
+                gamer.gunX = gamer.x + 20;
+            }
+            if (y < height - h / 2 && y > h / 2) {
+                gamer.y = y - gamer.height / 2;
+                gamer.gunY = gamer.y + 10;
+            }
+        }
+    }
+}
+
+
+function getCursorPos(e) {
+    let x, y, pos;
+
+    if (e.pageX || e.pageY) {
+        x = e.pageX;
+        y = e.pageY;
+    } else {
+        x = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+        y = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+    }
+    x -= canvas.offsetLeft;
+    y -= canvas.offsetTop;
+    pos = {x: x, y: y};
+    return pos;
+}
+
 function drawBullets() {
     if (bullets.length) {
         for (let i = 0; i < bullets.length; i++) {
@@ -218,6 +374,7 @@ function hitTest() {
     }
 }
 
+let menuAndElements = new gameElements();
 let gamer = new player(pl_x, pl_y);
 for (let i = 0; i < enemyTotal; i++) {
     enemies.push(new enemy(width + getRandom(en_w, 1000), getRandom(0, height - en_h), en_w, en_h, 20));
@@ -227,6 +384,7 @@ function gameLoop() {
     ctx.clearRect(0, 0, width, height);
     drawBackground();
     gamer.draw();
+    menuAndElements.draw();
     drawBullets();
     moveBullets();
     drawEnemies();
@@ -243,6 +401,8 @@ function init() {
     background.src = 'images/loopBackground.png';
     document.addEventListener('keydown', keyDown, false);
     document.addEventListener('keyup', keyUp, false);
+    document.addEventListener("mousemove", mouseMoveHandler, false);
+    document.addEventListener("click", Buttons, false);
     gameLoop()
 }
 
