@@ -1,6 +1,24 @@
 let canvas, ctx, width = window.innerWidth, height = 480;
 let background, backX = 0, backY = 0, backX2 = backSize = 1890;
 let pl_x = 30, pl_y = height / 2 - 70, score = 0, best_score = 0;
+let shotKey = false, rightKey = false, leftKey = false, upKey = false, downKey = false;
+
+function keyDown(e) {
+    if (e.keyCode === 39 || e.keyCode === 68) rightKey = true;
+    else if (e.keyCode === 37 || e.keyCode === 65) leftKey = true;
+    if (e.keyCode === 38 || e.keyCode === 87) upKey = true;
+    else if (e.keyCode === 40 || e.keyCode === 83) downKey = true;
+    if (e.keyCode === 77 || e.keyCode === 88) shotKey = true;
+}
+
+
+function keyUp(e) {
+    if (e.keyCode === 39 || e.keyCode === 68) rightKey = false;
+    else if (e.keyCode === 37 || e.keyCode === 65) leftKey = false;
+    if (e.keyCode === 38 || e.keyCode === 87) upKey = false;
+    else if (e.keyCode === 40 || e.keyCode === 83) downKey = false;
+    if (e.keyCode === 77 || e.keyCode === 88) shotKey = false;
+}
 
 
 function getRandom(min, max) {
@@ -48,6 +66,21 @@ class player {
 
     draw() {
 
+        if (rightKey && this.x + this.width < width) {
+            this.x += 5;
+            this.gunX += 5;
+        } else if (leftKey && this.x > 0) {
+            this.x -= 5;
+            this.gunX -= 5;
+        }
+        if (upKey && this.y > 0) {
+            this.y -= 5;
+            this.gunY -= 5;
+        } else if (downKey && this.y + this.height < height) {
+            this.y += 5;
+            this.gunY += 5;
+        }
+
         ++this.fps;
         if (this.fps === 6) {
             this.curFrame = ++this.curFrame % this.frameCount;
@@ -78,6 +111,8 @@ function init() {
     canvas.width = window.innerWidth;
     background = new Image();
     background.src = 'images/loopBackground.png';
+    document.addEventListener('keydown', keyDown, false);
+    document.addEventListener('keyup', keyUp, false);
     gameLoop()
 }
 

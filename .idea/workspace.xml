@@ -20,12 +20,15 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="1rqpKwfIdxnNwhVHxVF3hLp13Ar" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
@@ -40,7 +43,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1619713437557</updated>
-      <workItem from="1619713457027" duration="2224000" />
+      <workItem from="1619713457027" duration="2533000" />
     </task>
     <task id="LOCAL-00001" summary="created">
       <created>1619714794947</created>
@@ -56,7 +59,14 @@
       <option name="project" value="LOCAL" />
       <updated>1619715532489</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="player: create and animation">
+      <created>1619715987750</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1619715987750</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -74,9 +84,11 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="create page" />
     <MESSAGE value="created" />
     <MESSAGE value="background" />
-    <option name="LAST_COMMIT_MESSAGE" value="background" />
+    <MESSAGE value="player: create and animation" />
+    <option name="LAST_COMMIT_MESSAGE" value="player: create and animation" />
   </component>
 </project>
