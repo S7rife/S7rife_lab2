@@ -196,6 +196,28 @@ function moveEnemies() {
     }
 }
 
+function hitTest() {
+    let removeBul = false;
+    for (let i = 0; i < bullets.length; i++) {
+        for (let j = 0; j < enemies.length; j++) {
+            if (bullets[i].attackX >= enemies[j].x && bullets[i].attackX <= (enemies[j].x + enemies[j].width) &&
+                bullets[i].attackY >= enemies[j].y && bullets[i].attackY <= (enemies[j].y + enemies[j].height)) {
+                enemies[j].lives -= 10;
+                removeBul = true;
+                if (enemies[j].lives <= 0) {
+                    enemies.splice(j, 1);
+                    score += 10;
+                    enemies.push(new enemy(width + en_w, getRandom(0, height - en_h), en_w, en_h, 20));
+                }
+            }
+        }
+        if (removeBul === true) {
+            bullets.splice(i, 1);
+            removeBul = false;
+        }
+    }
+}
+
 let gamer = new player(pl_x, pl_y);
 for (let i = 0; i < enemyTotal; i++) {
     enemies.push(new enemy(width + getRandom(en_w, 1000), getRandom(0, height - en_h), en_w, en_h, 20));
@@ -209,6 +231,7 @@ function gameLoop() {
     moveBullets();
     drawEnemies();
     moveEnemies();
+    hitTest();
     setTimeout(gameLoop, 1000 / 60);
 }
 
