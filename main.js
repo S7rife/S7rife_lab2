@@ -9,6 +9,7 @@ let bulletsTotal = 20, bullets = [];
 let enemyTotal = 10, enemies = [], en_w = 80, en_h = 80;
 let weInSelect = false, weInStart = true, weInLose = false, wePlaying = false;
 let godMode = false, gameFrequency = 0;
+let bossInGame = false, bossGoal = 0;
 
 function keyDown(e) {
     if (wePlaying && !touchControl) {
@@ -68,7 +69,6 @@ class player {
         this.curFrame = 0;
         this.frameCount = 7;
         this.srcX = 0;
-        this.fps = 0;
         this.gun = new Image();
         this.gun.src = 'images/gun_sprites.png';
         this.gunX = x + 20;
@@ -78,7 +78,6 @@ class player {
         this.gCurFrame = 0;
         this.gFrameCount = 3;
         this.srcXg = 0;
-
         this.god = new Image();
         this.god.src = 'images/god_sprite.png';
         this.godWidth = 207;
@@ -105,38 +104,33 @@ class player {
             this.gunY += 5;
         }
 
-        ++this.fps;
-        if (this.fps === 6) {
-            if (godMode){
+
+        if (gameFrequency % 6 === 0) {
+            if (godMode) {
                 this.godCurFrame = ++this.godCurFrame % this.godFrameCount;
                 this.srcXgod = this.godCurFrame * this.godWidth;
-            }else {
+            } else {
                 this.curFrame = ++this.curFrame % this.frameCount;
                 this.srcX = this.curFrame * this.width;
 
                 this.gCurFrame = ++this.gCurFrame % this.gFrameCount;
                 this.srcXg = this.gCurFrame * this.gunWidth;
             }
-            this.fps = 0;
         }
 
 
-
         if (wePlaying) {
-            if (godMode){
-                this.gunX = pl_x + 20;
-                this.gunY = pl_y + 10;
-                this.x = pl_x;
-                this.y = pl_y;
-                ctx.drawImage(this.god, this.srcXgod, 0, this.godWidth, this.godHeight, -100, 0, this.godWidth * 2.2, this.godHeight * 2.2);
+            if (godMode) {
+                ctx.drawImage(this.god, this.srcXgod, 0, this.godWidth, this.godHeight, this.x - 270, this.y - 160, this.godWidth * 2.2, this.godHeight * 2.2);
 
-            }else{
+            } else {
                 ctx.drawImage(this.img, this.srcX, 0, this.width, this.height, this.x, this.y, this.width, this.height);
                 ctx.drawImage(this.gun, this.srcXg, 0, this.gunWidth, this.gunHeight, this.gunX, this.gunY, this.gunWidth - 60, this.gunHeight - 45);
             }
         }
     }
 }
+
 
 class bullet {
     constructor(x, y) {
@@ -151,21 +145,20 @@ class bullet {
         this.curFrame = 0;
         this.frameCount = 10;
         this.srcX = 0;
-        this.fps = 0;
     }
 
     draw() {
-        ++this.fps;
+
         this.attackX = this.x + this.width / 2;
         this.attackY = this.y + this.height / 2;
-        if (this.fps === 4) {
+        if (gameFrequency % 4 === 0) {
             this.curFrame = ++this.curFrame % this.frameCount;
             this.srcX = this.curFrame * this.width;
-            this.fps = 0;
         }
         ctx.drawImage(this.bul, this.srcX, 0, this.width, this.height, this.x, this.y, this.width, this.height);
     }
 }
+
 
 class enemy {
     constructor(x, y, w, h) {
@@ -179,20 +172,48 @@ class enemy {
         this.curFrame = 0;
         this.frameCount = 6;
         this.srcX = 0;
-        this.fps = 0;
     }
 
     draw() {
         ctx.drawImage(this.img, this.srcX, 0, this.width, this.height, this.x, this.y, this.width, this.height);
 
-        if (this.fps === 6) {
+        if (gameFrequency % 6 === 0) {
             this.curFrame = ++this.curFrame % this.frameCount;
             this.srcX = this.curFrame * this.width;
-            this.fps = 0;
         }
-        ++this.fps;
     }
 }
+
+
+class boss {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.width = 499;
+        this.height = 644;
+        this.lives = 1000;
+        this.boss = new Image();
+        this.boss.src = 'images/boss_sprite.png';
+        this.curFrame = 0;
+        this.frameCount = 8;
+        this.srcX = 0;
+        this.imgLive = new Image();
+        this.imgLive.src = 'images/boss_lives.png';
+    }
+
+    draw() {
+        ctx.drawImage(this.boss, this.srcX, 0, this.width, this.height, this.x, 0, this.width, this.height);
+
+        if (gameFrequency % 10 === 0) {
+            this.curFrame = ++this.curFrame % this.frameCount;
+            this.srcX = this.curFrame * this.width;
+        }
+        let k = 0;
+        if (Boss.lives !== 1000) k = 20 - ~~(Boss.lives / 50);
+        ctx.drawImage(this.imgLive, 0, k * 96, 1200, 96, width / 2 - 240, 0, 400, 33);
+    }
+}
+
 
 class gameElements {
     constructor() {
@@ -217,7 +238,6 @@ class gameElements {
 
     draw() {
         ctx.font = 'normal 40px VT323';
-
         if (!wePlaying) {
             if (weInStart) {
                 ctx.drawImage(this.startMenu, 0, 0, this.menuWidth - 2, height, this.menuX, 0, this.menuWidth, this.menuHeight);
@@ -235,7 +255,6 @@ class gameElements {
 
                 ctx.fillText("↓↑→←\\dsaw :tnemevom", this.center - 20, height - 65);
                 ctx.fillText("x\\m :gnitoohs", this.center + 132, height - 35);
-
 
             } else if (weInLose) {
                 ctx.drawImage(this.loseMenu, 0, 0, this.menuWidth - 2, height, this.menuX, 0, this.menuWidth, this.menuHeight);
@@ -260,15 +279,15 @@ class gameElements {
     }
 }
 
+
 function Buttons(e) {
     let pos = getCursorPos(e);
     let x = pos.x, y = pos.y;
-
     if (wePlaying) return false;
 
     else if (weInStart && x > width / 2 - 120 && x < width / 2 + 120 && y > height / 2 + 15 && y < height / 2 + 95) {
         weInStart = false;
-        enemies = [];
+        resetGame();
         for (let i = 0; i < enemyTotal; i++) {
             enemies.push(new enemy(width + getRandom(en_w, 1000), getRandom(0, height - en_h), en_w, en_h, 20));
         }
@@ -293,9 +312,9 @@ function Buttons(e) {
     } else if (weInLose) {
         let center = menuAndElements.center;
         if (x > center - 141 && x < center + 141 && y > height / 2 + 60 && y < height / 2 + 110) {
+            weInStart = false;
             wePlaying = true;
-            weInLose = false;
-            enemies = [];
+            resetGame();
             for (let i = 0; i < enemyTotal; i++) {
                 enemies.push(new enemy(width + getRandom(en_w, 1000), getRandom(0, height - en_h), en_w, en_h, 20));
             }
@@ -304,11 +323,11 @@ function Buttons(e) {
             weInStart = true;
             weInLose = false;
         }
-
         gamer.lives = 100;
         score = 0;
     }
 }
+
 
 function mouseMoveHandler(e) {
     let pos = getCursorPos(e);
@@ -317,7 +336,6 @@ function mouseMoveHandler(e) {
 
     if (wePlaying) {
         if (touchControl) {
-
             if (x < width - w / 2 && x > w / 2) {
                 gamer.x = x - gamer.width / 2;
                 gamer.gunX = gamer.x + 20;
@@ -347,6 +365,7 @@ function getCursorPos(e) {
     return pos;
 }
 
+
 function drawBullets() {
     if (bullets.length) {
         for (let i = 0; i < bullets.length; i++) {
@@ -363,8 +382,18 @@ function moveBullets() {
         } else if (bullets[i].x > width + 100) {
             bullets.splice(i, 1);
         }
+        if (bossInGame && bullets[i].attackX > width - 400 && bullets[i].attackX < width && Boss.x === width - 400) {
+            bullets.splice(i, 1);
+            if (Boss.lives <= 0) {
+                resetGame();
+                weInLose = true;
+                wePlaying = false;
+
+            } else Boss.lives -= 15;
+        }
     }
 }
+
 
 function drawEnemies() {
     for (let i = 0; i < enemies.length; i++) {
@@ -384,6 +413,14 @@ function moveEnemies() {
     }
 }
 
+
+function moveBoss() {
+    if (Boss.x > width - 400) {
+        Boss.x -= 2;
+    }
+}
+
+
 function hitTest() {
     let removeBul = false;
     for (let i = 0; i < bullets.length; i++) {
@@ -395,7 +432,7 @@ function hitTest() {
                 if (enemies[j].lives <= 0) {
                     enemies.splice(j, 1);
                     score += 10;
-                    enemies.push(new enemy(width + en_w, getRandom(0, height - en_h), en_w, en_h, 20));
+                    if (enemies.length < enemyTotal) enemies.push(new enemy(width + en_w, getRandom(0, height - en_h), en_w, en_h, 20));
                 }
             }
         }
@@ -405,6 +442,7 @@ function hitTest() {
         }
     }
 }
+
 
 function checkCollision() {
     let ship_xw = gamer.x + gamer.width, ship_yh = gamer.y + gamer.height;
@@ -422,7 +460,12 @@ function checkCollision() {
             checkLives();
         }
     }
+    if (bossInGame && gamer.x > width - 480 && !godMode) {
+        gamer.lives = 0;
+        checkLives();
+    }
 }
+
 
 function autoShot() {
     let posY = gamer.y;
@@ -438,24 +481,40 @@ function autoShot() {
     shotKey = true;
 }
 
-function checkLives() {
 
+function checkLives() {
     if (!godMode && gamer.lives > 25) {
         gamer.lives -= 25;
         godMode = true;
 
     } else if (!godMode && gamer.lives <= 25) {
-        if (score > best_score) best_score = score;
+        resetGame();
         wePlaying = false;
         weInLose = true;
     }
 }
 
+
+function resetGame() {
+    if (score > best_score) best_score = score;
+    bossGoal = getRandom(100, 300);
+    enemies = [];
+    enemyTotal = 10;
+    bullets = [];
+    Boss.lives = 1000;
+    bossInGame = false;
+    godMode = false;
+    Boss.x = width;
+}
+
+
 let menuAndElements = new gameElements();
 let gamer = new player(pl_x, pl_y);
+let Boss = new boss(width, 0);
 for (let i = 0; i < enemyTotal; i++) {
     enemies.push(new enemy(width + getRandom(en_w, 1000), getRandom(0, height - en_h), en_w, en_h, 20));
 }
+
 
 function gameLoop() {
     ctx.clearRect(0, 0, width, height);
@@ -471,14 +530,20 @@ function gameLoop() {
         drawEnemies();
         moveEnemies();
         hitTest();
-        if (touchControl || godMode) autoShot();
-        if (godMode) {
-            if (gameFrequency % 500 === 0) godMode = false;
+        if (bossInGame && Boss.lives > 0) {
+            moveBoss();
+            Boss.draw();
+        } else if (gamer.lives > 0 && score >= bossGoal) {
+            enemyTotal = 0;
+            bossInGame = true;
         }
+        if (touchControl || godMode) autoShot();
+        if (godMode && gameFrequency % 500 === 0) godMode = false;
     }
     gameFrequency < 10000 ? gameFrequency++ : gameFrequency = 0;
     setTimeout(gameLoop, 1000 / 60);
 }
+
 
 function init() {
     canvas = document.getElementById('canvas');
