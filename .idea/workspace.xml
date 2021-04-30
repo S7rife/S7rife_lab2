@@ -2,11 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="23381c7e-80b0-41d0-9a9b-55f5f0e1fd69" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/images/bot.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/images/portal(ex).png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/images/portal.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/images/portal2.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/images/botLeft.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/images/botRight.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/images/loopBackground2.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/images/loopBackground3.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/bot.png" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/main.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -48,7 +49,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1619713437557</updated>
-      <workItem from="1619713457027" duration="39976000" />
+      <workItem from="1619713457027" duration="54958000" />
     </task>
     <task id="LOCAL-00001" summary="created">
       <created>1619714794947</created>
@@ -127,7 +128,14 @@
       <option name="project" value="LOCAL" />
       <updated>1619746780606</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="look">
+      <created>1619757225206</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1619757225206</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -158,18 +166,7 @@
     <MESSAGE value="game process and mouse control" />
     <MESSAGE value="player: God Mode" />
     <MESSAGE value="boss no attack, update player" />
-    <option name="LAST_COMMIT_MESSAGE" value="boss no attack, update player" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/main.js</url>
-          <line>448</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="4" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="look" />
+    <option name="LAST_COMMIT_MESSAGE" value="look" />
   </component>
 </project>

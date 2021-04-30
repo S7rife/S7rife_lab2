@@ -2,10 +2,10 @@ let touchControl = false;
 if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) touchControl = true;
 
 let canvas, ctx, width = window.innerWidth, height = 480;
-let background, backX = 0, backY = 0, backX2 = backSize = 1890;
+let backX = 0, backY = 0, backX2 = backSize = 1890;
 let pl_x = 30, pl_y = height / 2 - 70, score = 0, best_score = 0;
 let shotKey = false, rightKey = false, leftKey = false, upKey = false, downKey = false;
-let bulletsTotal = 20, bullets = [];
+let bulletsTotal = 10, bullets = [];
 let enemyTotal = 10, enemies = [], en_w = 80, en_h = 80;
 let weInSelect = false, weInStart = true, weInLose = false, wePlaying = false;
 let godMode = false, gameFrequency = 0;
@@ -45,8 +45,20 @@ function getRandom(min, max) {
 }
 
 function drawBackground() {
-    ctx.drawImage(background, backX, backY);
-    ctx.drawImage(background, backX2, backY);
+    this.backOrd = new Image();
+    this.backOrd.src = 'images/loopBackground.png';
+    this.backBoss = new Image();
+    this.backBoss.src = 'images/loopBackground2.jpg';
+    this.backMenu = new Image();
+    this.backMenu.src = 'images/loopBackground3.png';
+
+    let source;
+    if (bossInGame) source = this.backBoss;
+    else if (wePlaying) source = this.backOrd;
+    else source = this.backMenu;
+
+    ctx.drawImage(source, backX, backY);
+    ctx.drawImage(source, backX2, backY);
     if (backX < -backSize) {
         backX = backSize - 5;
     }
@@ -232,32 +244,68 @@ class boss {
         if (!bossInGame || this.x !== width - 400) {
             ctx.drawImage(this.portal, this.pSrcX, 0, this.pWidth, this.pHeight, width - 450, height / 2 - this.pHeight / 2 * 1.5, this.pWidth * 1.5, this.pHeight * 1.5);
         }
-        if (bossInGame && wePlaying) {
+        if (wePlaying && bossInGame) {
             ctx.drawImage(this.portal2, this.pSrcX, 0, this.pWidth, this.pHeight, width - 500, height - this.pHeight * 0.3, this.pWidth * 0.3, this.pHeight * 0.3);
             ctx.drawImage(this.portal2, this.pSrcX, 0, this.pWidth, this.pHeight, width - 500, 0, this.pWidth * 0.3, this.pHeight * 0.3);
         }
     }
 }
 
-// class obstacle {
-//     constructor(x, y) {
-//         this.img = new Image();
-//         this.img.src = 'images/bot.png';
-//         this.x = x;
-//         this.y = y;
-//         this.bWidth = 427;
-//         this.bHeight = 437;
-//         this.bCurFrame = 0;
-//         this.bFrameCount = 11;
-//         this.bSrcX = 0;
-//
-//
-//     }
-//
-//     draw() {
-//
-//     }
-// }
+class obstacle {
+    constructor(x, y, x2, y2) {
+        this.botLeft = new Image();
+        this.botLeft.src = 'images/botLeft.png';
+        this.botRight = new Image();
+        this.botRight.src = 'images/botRight.png';
+        this.x = x;
+        this.y = y;
+        this.width = 70;
+        this.height = 70;
+        this.endX = x2;
+        this.endY = y2;
+        this.bWidth = 500;
+        this.bHeight = 500;
+        this.bCurFrame = 0;
+        this.bFrameCount = 11;
+        this.bSrcX = 0;
+    }
+
+    draw() {
+
+        let source;
+        if (gameFrequency % 1000 === 0) {
+            this.endX = gamer.x
+            this.endY = gamer.y
+        }
+
+        if (gameFrequency % 300 === 0) {
+            this.endX = getRandom(0, width - 500);
+            this.endY = getRandom(100, height - 100);
+        }
+
+
+        this.x < this.endX ? source = this.botRight : source = this.botLeft;
+
+        ctx.drawImage(source, this.bSrcX, 0, this.bWidth, this.bHeight, this.x, this.y, this.width, this.height);
+        if (gameFrequency % 20 === 0) {
+            this.bCurFrame = ++this.bCurFrame % this.bFrameCount;
+            this.bSrcX = this.bCurFrame * this.bWidth;
+        }
+
+        if (this.x !== this.endX || this.y !== this.endY) {
+            let dx = this.endX - this.x;
+            let dy = this.endY - this.y;
+            let d = Math.sqrt(dx * dx + dy * dy);
+            if (d <= 5) {
+                this.x = this.endX;
+                this.y = this.endY;
+            } else {
+                this.x += 0.6 * dx / d;
+                this.y += 0.6 * dy / d;
+            }
+        }
+    }
+}
 
 
 class gameElements {
@@ -458,7 +506,6 @@ function moveBoss() {
     }
 }
 
-
 function hitTest() {
     let removeBul = false;
     for (let i = 0; i < bullets.length; i++) {
@@ -481,22 +528,28 @@ function hitTest() {
     }
 }
 
+function collisionDetection(x1, y1, w1, h1, x2, y2, w2, h2) {
+    let rect1 = {x: x1, y: y1, width: w1, height: h1}
+    let rect2 = {x: x2, y: y2, width: w2, height: h2}
+
+    if (rect1.x < rect2.x + rect2.width &&
+        rect1.x + rect1.width > rect2.x &&
+        rect1.y < rect2.y + rect2.height &&
+        rect1.y + rect1.height > rect2.y) return true;
+}
+
 
 function checkCollision() {
-    let ship_xw = gamer.x + gamer.width, ship_yh = gamer.y + gamer.height;
     for (let i = 0; i < enemies.length; i++) {
-        if (gamer.x > enemies[i].x && gamer.x < enemies[i].x + en_w && gamer.y > enemies[i].y && gamer.y < enemies[i].y + en_h) {
-            checkLives();
+        if (collisionDetection(gamer.x, gamer.y, gamer.width, gamer.height, enemies[i].x, enemies[i].y, enemies[i].width, enemies[i].height)) {
+            checkLives()
         }
-        if (ship_xw < enemies[i].x + en_w && ship_xw > enemies[i].x && gamer.y > enemies[i].y && gamer.y < enemies[i].y + en_h) {
-            checkLives();
-        }
-        if (ship_yh > enemies[i].y && ship_yh < enemies[i].y + en_h && gamer.x > enemies[i].x && gamer.x < enemies[i].x + en_w) {
-            checkLives();
-        }
-        if (ship_yh > enemies[i].y && ship_yh < enemies[i].y + en_h && ship_xw < enemies[i].x + en_w && ship_xw > enemies[i].x) {
-            checkLives();
-        }
+    }
+    if (collisionDetection(gamer.x, gamer.y, gamer.width, gamer.height, bot.x, bot.y, bot.width, bot.height)) {
+        checkLives()
+    }
+    if (collisionDetection(gamer.x, gamer.y, gamer.width, gamer.height, bot2.x, bot2.y, bot2.width, bot2.height)) {
+        checkLives()
     }
     if (bossInGame && gamer.x > width - 480 && !godMode) {
         gamer.lives = 0;
@@ -509,8 +562,8 @@ function autoShot() {
     let posY = gamer.y;
     let shot = 30;
     if (godMode) {
-        shot = 5;
-        posY = getRandom(-20, 420);
+        shot = 10;
+        posY = getRandom(gamer.y - 100, gamer.y + 100);
     }
     if (bullets.length <= bulletsTotal && gameFrequency % shot === 0) {
         bullets.push(new bullet(gamer.x, posY))
@@ -526,7 +579,7 @@ function checkLives() {
         godMode = true;
 
     } else if (!godMode && gamer.lives <= 25) {
-        resetGame();
+        // resetGame();
         wePlaying = false;
         weInLose = true;
     }
@@ -548,18 +601,25 @@ function resetGame() {
     Boss.lives = 1000;
     Boss.x = width - 200;
     gamer.lives = 100;
+    bot.x = width - 485;
+    bot.y = height - 100;
+    bot2.x = width - 485;
+    bot2.y = 100;
 }
 
 
 let menuAndElements = new gameElements();
 let gamer = new player(pl_x, pl_y);
 let Boss = new boss(width - 200, 0);
+let bot = new obstacle(width - 485, 35, width / 2, height - 100);
+let bot2 = new obstacle(width - 485, height - 100, width / 2, 100);
 
 
 function gameLoop() {
     ctx.clearRect(0, 0, width, height);
     document.body.style.cursor = 'default';
     drawBackground();
+
     gamer.draw();
     Boss.drawPortal();
     menuAndElements.draw();
@@ -572,6 +632,8 @@ function gameLoop() {
         moveEnemies();
         hitTest();
         if (bossInGame && Boss.lives > 0) {
+            bot.draw();
+            bot2.draw();
             moveBoss();
             Boss.draw();
         } else if (gamer.lives > 0 && score >= bossGoal) {
@@ -582,7 +644,7 @@ function gameLoop() {
         if (godMode && gameFrequency % 500 === 0) godMode = false;
     }
     gameFrequency < 10000 ? gameFrequency++ : gameFrequency = 0;
-    setTimeout(gameLoop, 1000 / 250);
+    setTimeout(gameLoop, 1000 / 60);
 }
 
 
@@ -590,8 +652,6 @@ function init() {
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
     canvas.width = window.innerWidth;
-    background = new Image();
-    background.src = 'images/loopBackground.png';
     document.addEventListener('keydown', keyDown, false);
     document.addEventListener('keyup', keyUp, false);
     document.addEventListener("mousemove", mouseMoveHandler, false);
