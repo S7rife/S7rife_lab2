@@ -2,8 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="23381c7e-80b0-41d0-9a9b-55f5f0e1fd69" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/images/boss_lives.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/images/boss_sprite.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/images/bot.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/images/portal(ex).png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/images/portal.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/images/portal2.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/main.js" afterDir="false" />
     </list>
@@ -46,7 +48,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1619713437557</updated>
-      <workItem from="1619713457027" duration="30580000" />
+      <workItem from="1619713457027" duration="39976000" />
     </task>
     <task id="LOCAL-00001" summary="created">
       <created>1619714794947</created>
@@ -118,7 +120,14 @@
       <option name="project" value="LOCAL" />
       <updated>1619724386878</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="boss no attack, update player">
+      <created>1619746780606</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1619746780606</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -148,6 +157,19 @@
     <MESSAGE value="menu and other elements" />
     <MESSAGE value="game process and mouse control" />
     <MESSAGE value="player: God Mode" />
-    <option name="LAST_COMMIT_MESSAGE" value="player: God Mode" />
+    <MESSAGE value="boss no attack, update player" />
+    <option name="LAST_COMMIT_MESSAGE" value="boss no attack, update player" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/main.js</url>
+          <line>448</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
