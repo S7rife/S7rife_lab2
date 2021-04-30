@@ -499,6 +499,7 @@ function moveBoss() {
     }
 }
 
+
 function hitTest() {
     let removeBul = false;
     for (let i = 0; i < bullets.length; i++) {
@@ -520,6 +521,7 @@ function hitTest() {
         }
     }
 }
+
 
 function collisionDetection(x1, y1, w1, h1, x2, y2, w2, h2) {
     if (x1 < x2 + w2 && x1 + w1 > x2 && y1 < y2 + h2 && y1 + h1 > y2) return true;
@@ -589,6 +591,7 @@ function resetGame() {
     bot2.x = width - 485;
     bot2.y = 100;
 }
+
 
 function offGodMode() {
     godMode = false;
