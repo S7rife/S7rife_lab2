@@ -2,13 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="23381c7e-80b0-41d0-9a9b-55f5f0e1fd69" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/images/bullet_spritesEx1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/images/bullet_spritesEx2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/images/enemy_sprites_boss.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/bullet_sprites.png" beforeDir="false" afterPath="$PROJECT_DIR$/images/bullet_sprites.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/enemy_sprites.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/main.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,7 +53,8 @@
       <updated>1619713437557</updated>
       <workItem from="1619713457027" duration="65073000" />
       <workItem from="1619789077026" duration="1392000" />
-      <workItem from="1619832311326" duration="29795000" />
+      <workItem from="1619832311326" duration="29945000" />
+      <workItem from="1619866914336" duration="278000" />
     </task>
     <task id="LOCAL-00001" summary="created">
       <created>1619714794947</created>
@@ -208,7 +203,14 @@
       <option name="project" value="LOCAL" />
       <updated>1619860063693</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="upgrade enemies">
+      <created>1619865823215</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1619865823215</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -219,7 +221,25 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/main" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+              <option name="TEXT_FILTER_SETTINGS">
+                <TextFilterSettings>
+                  <option name="REGEX" value="true" />
+                  <option name="MATCH_CASE" value="true" />
+                </TextFilterSettings>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
@@ -251,6 +271,7 @@
     <MESSAGE value="fix font and god mode" />
     <MESSAGE value="fix auto shot, update god mode" />
     <MESSAGE value="fix" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix" />
+    <MESSAGE value="upgrade enemies" />
+    <option name="LAST_COMMIT_MESSAGE" value="upgrade enemies" />
   </component>
 </project>
