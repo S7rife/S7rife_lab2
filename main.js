@@ -324,7 +324,7 @@ class gameElements {
     }
 
     draw() {
-        ctx.font = 'normal 40px VT323';
+        ctx.font = '40px VT323-Regular';
         if (!wePlaying) {
             if (weInStart) {
                 ctx.drawImage(this.startMenu, 0, 0, this.menuWidth - 2, height, this.menuX, 0, this.menuWidth, this.menuHeight);

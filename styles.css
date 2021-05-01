@@ -1,8 +1,17 @@
+@font-face {
+    font-family: 'VT323-Regular';
+    src: url('fonts/VT323-Regular.woff') format('woff'), url('fonts/VT323-Regular.eot');  url('fonts/VT323-Regular.ttf') format('truetype'), url('fonts/VT323-Regular.otf') format('otf');
+    font-weight: normal;
+    font-style: normal;
+}
+
+
 body {
     padding: 0;
     margin: 0;
     background: #000000;
 }
+
 
 canvas {
     display: block;
