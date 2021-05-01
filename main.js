@@ -2,7 +2,9 @@ let touch = false;
 let mobile = false
 if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) mobile = true;
 
-let canvas, ctx, width = window.innerWidth, height = 480;
+let canvas, ctx, width = window.innerWidth;
+let height = 480;
+
 let backX = 0, backY = 0, backX2 = backSize = 1890;
 let pl_x = 30, pl_y = height / 2 - 70, score = 0, best_score = 0;
 let shotKey = false, rightKey = false, leftKey = false, upKey = false, downKey = false;
@@ -13,7 +15,7 @@ let godMode = false, gameFrequency = 0;
 let bossInGame = false, bossGoal = 0;
 
 function keyDown(e) {
-    if (wePlaying && !touch) {
+    if (wePlaying && !touch && !mobile) {
         if (e.keyCode === 39 || e.keyCode === 68) rightKey = true;
         else if (e.keyCode === 37 || e.keyCode === 65) leftKey = true;
         if (e.keyCode === 38 || e.keyCode === 87) upKey = true;
@@ -29,7 +31,7 @@ function keyDown(e) {
 
 
 function keyUp(e) {
-    if (wePlaying && !touch) {
+    if (wePlaying && !touch && !mobile) {
         if (e.keyCode === 39 || e.keyCode === 68) rightKey = false;
         else if (e.keyCode === 37 || e.keyCode === 65) leftKey = false;
         if (e.keyCode === 38 || e.keyCode === 87) upKey = false;
@@ -373,7 +375,7 @@ function Buttons(e) {
     else if (weInStart && x > width / 2 - 120 && x < width / 2 + 120 && y > height / 2 + 15 && y < height / 2 + 95) {
         weInStart = false;
         resetGame();
-        mobile ? wePlaying = true : weInSelect = true;
+        (mobile) ? wePlaying = true : weInSelect = true;
 
     } else if (weInSelect) {
         let y1 = 187, y2 = 380, x0 = menuAndElements.center - menuAndElements.menuWidth / 2;
@@ -605,6 +607,99 @@ let bot = new obstacle(width - 485, 35, width / 2, height - 100);
 let bot2 = new obstacle(width - 485, height - 100, width / 2, 100);
 
 
+let ongoingTouches = [];
+let lastx = 0;
+let lasty = 0;
+let dx, dy;
+let startTap = false;
+let touches = [];
+let moveTouch = false;
+
+
+function copyTouch({identifier, pageX, pageY}) {
+    return {identifier, pageX, pageY};
+}
+
+function handleStart(evt) {
+    if (wePlaying) {
+        startTap = true;
+        evt.preventDefault();
+        touches = evt.changedTouches;
+        ongoingTouches.push(copyTouch(touches[0]));
+        lastx = ongoingTouches[0].pageX;
+        lasty = ongoingTouches[0].pageY;
+    }
+}
+
+function handleMove(evt) {
+    if (wePlaying) {
+        startTap = false;
+        evt.preventDefault();
+        if (mobile) {
+            let touches = evt.changedTouches;
+            moveTouch = touches[0];
+            if (moveTouch.pageX - dx > 20 || moveTouch.pageX - dx < -20) {
+                console.log('danger');
+            }
+            dx = -lastx + moveTouch.pageX;
+            dy = -lasty + moveTouch.pageY;
+            touchMove(dx, dy);
+            lastx = moveTouch.pageX;
+            lasty = moveTouch.pageY;
+        }
+    }
+}
+
+function handleEnd(evt) {
+    if (wePlaying){
+        evt.preventDefault();
+        let touches = evt.changedTouches;
+        for (let i = 0; i < touches.length; i++) {
+            let idx = ongoingTouchIndexById(touches[i].identifier);
+            if (idx >= 0) {
+                ongoingTouches.splice(idx, 1);
+            }
+        }
+    }
+}
+
+function handleCancel(evt) {
+    if (wePlaying){
+        evt.preventDefault();
+        console.log("touchcancel.");
+        let touches = evt.changedTouches;
+
+        for (let i = 0; i < touches.length; i++) {
+            let idx = ongoingTouchIndexById(touches[i].identifier);
+            ongoingTouches.splice(idx, 1);
+        }
+    }
+}
+
+function ongoingTouchIndexById(idToFind) {
+    for (let i = 0; i < ongoingTouches.length; i++) {
+        let id = ongoingTouches[i].identifier;
+
+        if (id === idToFind) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+function touchMove(dx, dy) {
+
+    if ((gamer.x + dx) < width - 64 && (gamer.x + dx) > 0) {
+        gamer.x += dx;
+        gamer.gunX += dx;
+    }
+    if ((gamer.y + dy) < height - 64 && (gamer.y + dy) > 0) {
+        gamer.y += dy;
+        gamer.gunY += dy;
+    }
+}
+
+
 function gameLoop() {
     ctx.clearRect(0, 0, width, height);
     document.body.style.cursor = 'default';
@@ -630,7 +725,7 @@ function gameLoop() {
             enemyTotal = 5;
             bossInGame = true;
         }
-        if (touch || godMode) autoShot();
+        if (touch || godMode || mobile) autoShot();
         if (godMode) setTimeout(offGodMode, 3000);
     }
     gameFrequency < 10000 ? gameFrequency++ : gameFrequency = 0;
@@ -646,6 +741,10 @@ function init() {
     document.addEventListener('keyup', keyUp, false);
     document.addEventListener("mousemove", mouseMoveHandler, false);
     document.addEventListener("click", Buttons, false);
+    canvas.addEventListener("touchstart", handleStart, false);
+    canvas.addEventListener("touchend", handleEnd, false);
+    canvas.addEventListener("touchcancel", handleCancel, false);
+    canvas.addEventListener("touchmove", handleMove, false);
     gameLoop()
 }
 
