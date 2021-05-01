@@ -712,6 +712,15 @@ function resetGame() {
     bot.y = height - 100;
     bot2.x = width - 485;
     bot2.y = 100;
+
+    ongoingTouches = [];
+    touches = [];
+    lastx = 0;
+    lasty = 0;
+    dx = 0;
+    dy = 0;
+    startTap = false;
+    moveTouch = false;
 }
 
 
@@ -723,14 +732,14 @@ let bot2 = new obstacle(width - 485, height - 100, width / 2, 100);
 
 
 function gameLoop() {
+    gamer.draw();
     ctx.clearRect(0, 0, width, height);
+    Boss.drawPortal();
     document.body.style.cursor = 'default';
     drawBackground();
-    gamer.draw();
     menuAndElements.draw();
     if (wePlaying && gamer.lives > 0) {
         document.body.style.cursor = 'none';
-        Boss.drawPortal();
         checkCollision();
         hitTest();
         drawBullets();
