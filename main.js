@@ -360,7 +360,7 @@ class gameElements {
             ctx.drawImage(this.elements, 0, (k * this.live_height) + 480, this.el_width, this.live_height, 0, 0, this.el_width - 20, this.live_height - 5);
             ctx.drawImage(this.elements, 0, 0, this.el_width, this.score_height, -35, 45, 110, 50);
             ctx.fillStyle = '#57cd0e';
-            ctx.font = 'normal 50px VT323';
+            ctx.font = '50px VT323-Regular';
             ctx.fillText(score, 60, 85);
         }
     }
@@ -566,6 +566,7 @@ function checkLives() {
     if (!godMode && gamer.lives > 25) {
         gamer.lives -= 25;
         godMode = true;
+        setTimeout(offGodMode, 5000);
 
     } else if (!godMode && gamer.lives <= 25) {
         wePlaying = false;
@@ -651,7 +652,7 @@ function handleMove(evt) {
 }
 
 function handleEnd(evt) {
-    if (wePlaying){
+    if (wePlaying) {
         evt.preventDefault();
         let touches = evt.changedTouches;
         for (let i = 0; i < touches.length; i++) {
@@ -664,7 +665,7 @@ function handleEnd(evt) {
 }
 
 function handleCancel(evt) {
-    if (wePlaying){
+    if (wePlaying) {
         evt.preventDefault();
         console.log("touchcancel.");
         let touches = evt.changedTouches;
@@ -704,12 +705,11 @@ function gameLoop() {
     ctx.clearRect(0, 0, width, height);
     document.body.style.cursor = 'default';
     drawBackground();
-
     gamer.draw();
-    Boss.drawPortal();
     menuAndElements.draw();
     if (wePlaying && gamer.lives > 0) {
         document.body.style.cursor = 'none';
+        Boss.drawPortal();
         checkCollision();
         drawBullets();
         moveBullets();
@@ -717,16 +717,15 @@ function gameLoop() {
         moveEnemies();
         hitTest();
         if (bossInGame && Boss.lives > 0) {
-            bot.draw();
-            bot2.draw();
             moveBoss();
             Boss.draw();
+            bot.draw();
+            bot2.draw();
         } else if (gamer.lives > 0 && score >= bossGoal) {
             enemyTotal = 5;
             bossInGame = true;
         }
         if (touch || godMode || mobile) autoShot();
-        if (godMode) setTimeout(offGodMode, 3000);
     }
     gameFrequency < 10000 ? gameFrequency++ : gameFrequency = 0;
     setTimeout(gameLoop, 1000 / 60);
