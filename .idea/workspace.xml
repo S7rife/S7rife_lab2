@@ -54,7 +54,7 @@
       <updated>1619713437557</updated>
       <workItem from="1619713457027" duration="65073000" />
       <workItem from="1619789077026" duration="1392000" />
-      <workItem from="1619832311326" duration="12833000" />
+      <workItem from="1619832311326" duration="22056000" />
     </task>
     <task id="LOCAL-00001" summary="created">
       <created>1619714794947</created>
@@ -182,7 +182,14 @@
       <option name="project" value="LOCAL" />
       <updated>1619843835525</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="fix font and god mode">
+      <created>1619848478595</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1619848478595</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -222,6 +229,19 @@
     <MESSAGE value="font" />
     <MESSAGE value="touch control" />
     <MESSAGE value="fix font" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix font" />
+    <MESSAGE value="fix font and god mode" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix font and god mode" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/main.js</url>
+          <line>519</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

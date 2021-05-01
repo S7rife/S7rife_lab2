@@ -1,21 +1,141 @@
-let touch = false;
+let mouse = false;
 let mobile = false
 if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) mobile = true;
 
-let canvas, ctx, width = window.innerWidth;
-let height = 480;
+let canvas, ctx, width = window.innerWidth, height = 480;
 
 let backX = 0, backY = 0, backX2 = backSize = 1890;
 let pl_x = 30, pl_y = height / 2 - 70, score = 0, best_score = 0;
 let shotKey = false, rightKey = false, leftKey = false, upKey = false, downKey = false;
-let bulletsTotal = 10, bullets = [];
+let bulletsTotal = 20, bullets = [];
 let enemyTotal = 10, enemies = [], en_w = 80, en_h = 80;
 let weInSelect = false, weInStart = true, weInLose = false, wePlaying = false;
 let godMode = false, gameFrequency = 0;
 let bossInGame = false, bossGoal = 0;
+let autoShotInterval = false;
+
+let ongoingTouches = [], touches = [], lastx = 0, lasty = 0, dx, dy;
+let startTap = false, moveTouch = false;
+
+
+function copyTouch({identifier, pageX, pageY}) {
+    return {identifier, pageX, pageY};
+}
+
+function handleStart(evt) {
+    if (wePlaying) {
+        startTap = true;
+        evt.preventDefault();
+        touches = evt.changedTouches;
+        ongoingTouches.push(copyTouch(touches[0]));
+        lastx = ongoingTouches[0].pageX;
+        lasty = ongoingTouches[0].pageY;
+    }
+}
+
+function handleMove(evt) {
+    if (wePlaying) {
+        startTap = false;
+        evt.preventDefault();
+        if (mobile) {
+            let touches = evt.changedTouches;
+            moveTouch = touches[0];
+            if (moveTouch.pageX - dx > 20 || moveTouch.pageX - dx < -20) {
+                console.log('danger');
+            }
+            dx = -lastx + moveTouch.pageX;
+            dy = -lasty + moveTouch.pageY;
+            touchMove(dx, dy);
+            lastx = moveTouch.pageX;
+            lasty = moveTouch.pageY;
+        }
+    }
+}
+
+function handleEnd(evt) {
+    if (wePlaying) {
+        evt.preventDefault();
+        let touches = evt.changedTouches;
+        for (let i = 0; i < touches.length; i++) {
+            let idx = ongoingTouchIndexById(touches[i].identifier);
+            if (idx >= 0) {
+                ongoingTouches.splice(idx, 1);
+            }
+        }
+    }
+}
+
+function handleCancel(evt) {
+    if (wePlaying) {
+        evt.preventDefault();
+        console.log("touchcancel.");
+        let touches = evt.changedTouches;
+
+        for (let i = 0; i < touches.length; i++) {
+            let idx = ongoingTouchIndexById(touches[i].identifier);
+            ongoingTouches.splice(idx, 1);
+        }
+    }
+}
+
+function ongoingTouchIndexById(idToFind) {
+    for (let i = 0; i < ongoingTouches.length; i++) {
+        let id = ongoingTouches[i].identifier;
+
+        if (id === idToFind) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+function touchMove(dx, dy) {
+
+    if ((gamer.x + dx) < width - 64 && (gamer.x + dx) > 0) {
+        gamer.x += dx;
+        gamer.gunX += dx;
+    }
+    if ((gamer.y + dy) < height - 64 && (gamer.y + dy) > 0) {
+        gamer.y += dy;
+        gamer.gunY += dy;
+    }
+}
+
+function mouseMoveHandler(e) {
+    let pos = getCursorPos(e);
+    let x = pos.x, y = pos.y;
+    let w = gamer.width, h = gamer.height;
+
+    if (wePlaying && mouse) {
+        if (x < width - w / 2 && x > w / 2) {
+            gamer.x = x - gamer.width / 2;
+            gamer.gunX = gamer.x + 20;
+        }
+        if (y < height - h / 2 && y > h / 2) {
+            gamer.y = y - gamer.height / 2;
+            gamer.gunY = gamer.y + 10;
+        }
+    }
+}
+
+function getCursorPos(e) {
+    let x, y, pos;
+
+    if (e.pageX || e.pageY) {
+        x = e.pageX;
+        y = e.pageY;
+    } else {
+        x = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+        y = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+    }
+    x -= canvas.offsetLeft;
+    y -= canvas.offsetTop;
+    pos = {x: x, y: y};
+    return pos;
+}
 
 function keyDown(e) {
-    if (wePlaying && !touch && !mobile) {
+    if (!mouse && !mobile) {
         if (e.keyCode === 39 || e.keyCode === 68) rightKey = true;
         else if (e.keyCode === 37 || e.keyCode === 65) leftKey = true;
         if (e.keyCode === 38 || e.keyCode === 87) upKey = true;
@@ -29,9 +149,8 @@ function keyDown(e) {
     }
 }
 
-
 function keyUp(e) {
-    if (wePlaying && !touch && !mobile) {
+    if (!mouse && !mobile) {
         if (e.keyCode === 39 || e.keyCode === 68) rightKey = false;
         else if (e.keyCode === 37 || e.keyCode === 65) leftKey = false;
         if (e.keyCode === 38 || e.keyCode === 87) upKey = false;
@@ -59,7 +178,6 @@ function drawBackground() {
     if (weInLose || weInStart || weInSelect) source = this.backMenu;
     else if (bossInGame) source = this.backBoss;
     else if (wePlaying) source = this.backOrd;
-
 
     ctx.drawImage(source, backX, backY);
     ctx.drawImage(source, backX2, backY);
@@ -249,6 +367,7 @@ class boss {
     }
 }
 
+
 class obstacle {
     constructor(x, y, x2, y2) {
         this.botLeft = new Image();
@@ -294,8 +413,8 @@ class obstacle {
                 this.x = this.endX;
                 this.y = this.endY;
             } else {
-                this.x += 0.6 * dx / d;
-                this.y += 0.6 * dy / d;
+                this.x += 0.8 * dx / d;
+                this.y += 0.8 * dy / d;
             }
         }
     }
@@ -374,73 +493,52 @@ function Buttons(e) {
 
     else if (weInStart && x > width / 2 - 120 && x < width / 2 + 120 && y > height / 2 + 15 && y < height / 2 + 95) {
         weInStart = false;
-        resetGame();
-        (mobile) ? wePlaying = true : weInSelect = true;
+
+        if (mobile) {
+            wePlaying = true
+            resetGame();
+
+        } else {
+            weInSelect = true;
+        }
 
     } else if (weInSelect) {
         let y1 = 187, y2 = 380, x0 = menuAndElements.center - menuAndElements.menuWidth / 2;
 
         if (y > y1 && y < y2) {
             if (x > x0 + 100 && x < x0 + 300) {
-                touch = true;
+                mouse = true;
                 weInSelect = false;
                 wePlaying = true;
+                resetGame();
 
             } else if (x > x0 + 380 && x < x0 + 580) {
-                touch = false;
+                mouse = false;
                 weInSelect = false;
                 wePlaying = true;
+                clearInterval(autoShotInterval);
+                resetGame();
             }
         }
 
     } else if (weInLose) {
         let center = menuAndElements.center;
         if (x > center - 141 && x < center + 141 && y > height / 2 + 60 && y < height / 2 + 110) {
-            resetGame();
+            godMode = false;
             weInLose = false;
             wePlaying = true;
+            resetGame();
+            if (!mouse && !mobile) {
+                clearInterval(autoShotInterval);
+            }
 
         } else if (x > center - 80 && x < center + 80 && y > height / 2 + 133 && y < height / 2 + 185) {
             weInStart = true;
             weInLose = false;
+            clearInterval(autoShotInterval);
         }
         score = 0;
     }
-}
-
-
-function mouseMoveHandler(e) {
-    let pos = getCursorPos(e);
-    let x = pos.x, y = pos.y;
-    let w = gamer.width, h = gamer.height;
-
-    if (wePlaying && touch) {
-        if (x < width - w / 2 && x > w / 2) {
-            gamer.x = x - gamer.width / 2;
-            gamer.gunX = gamer.x + 20;
-        }
-        if (y < height - h / 2 && y > h / 2) {
-            gamer.y = y - gamer.height / 2;
-            gamer.gunY = gamer.y + 10;
-        }
-    }
-}
-
-
-function getCursorPos(e) {
-    let x, y, pos;
-
-    if (e.pageX || e.pageY) {
-        x = e.pageX;
-        y = e.pageY;
-    } else {
-        x = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
-        y = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
-    }
-    x -= canvas.offsetLeft;
-    y -= canvas.offsetTop;
-    pos = {x: x, y: y};
-    return pos;
 }
 
 
@@ -512,7 +610,13 @@ function hitTest() {
                 removeBul = true;
                 if (enemies[j].lives <= 0) {
                     enemies.splice(j, 1);
-                    score += 25;
+                    score += 25 + getRandom(0, 25);
+                    if (gamer.lives > 0 && score >= bossGoal) {
+                        enemyTotal = 5;
+                        bossInGame = true;
+                        clearInterval(autoShotInterval);
+                        autoShotInterval = setInterval(autoShot, 200);
+                    }
                     if (enemies.length < enemyTotal) enemies.push(new enemy(width - 150, getRandom(100, height - 100), en_w, en_h, 20));
                 }
             }
@@ -543,42 +647,57 @@ function checkCollision() {
         checkLives()
     }
     if (bossInGame && gamer.x > width - 480 && !godMode) {
-        gamer.lives = 0;
+        gamer.lives -= 25;
         checkLives();
     }
 }
-
-
-function autoShot() {
-    let posY = gamer.y;
-    let shot = 20;
-    if (godMode) {
-        shot = 5;
-        posY = getRandom(gamer.y - 100, gamer.y + 100);
-    }
-    if (bullets.length <= bulletsTotal && gameFrequency % shot === 0) {
-        bullets.push(new bullet(gamer.x, posY))
-    }
-}
-
 
 function checkLives() {
     if (!godMode && gamer.lives > 25) {
         gamer.lives -= 25;
         godMode = true;
         setTimeout(offGodMode, 5000);
+        clearInterval(autoShotInterval);
+        autoShotInterval = setInterval(autoShot, 100);
 
     } else if (!godMode && gamer.lives <= 25) {
         wePlaying = false;
         weInLose = true;
+        resetGame();
+    }
+}
+
+function offGodMode() {
+    godMode = false;
+    clearInterval(autoShotInterval);
+    autoShotInterval = setInterval(autoShot, 300);
+}
+
+
+function autoShot() {
+    let posY = gamer.y + getRandom(-20, 20);
+    if (godMode) posY = getRandom(gamer.y - 200, gamer.y + 200);
+
+
+    if (bullets.length <= bulletsTotal) {
+        if (!bossInGame) bullets.push(new bullet(gamer.x, posY))
+        else {
+            bullets.push(new bullet(gamer.x, posY + 50));
+            bullets.push(new bullet(gamer.x, posY - 50));
+        }
     }
 }
 
 
 function resetGame() {
     bossInGame = false;
+    godMode = false;
+    if (mouse || mobile) {
+        clearInterval(autoShotInterval);
+        autoShotInterval = setInterval(autoShot, 300);
+    }
     if (score > best_score) best_score = score;
-    offGodMode();
+    godMode = false;
     bossGoal = getRandom(500, 1000);
     enemies = [];
     enemyTotal = 10;
@@ -596,109 +715,11 @@ function resetGame() {
 }
 
 
-function offGodMode() {
-    godMode = false;
-}
-
-
 let menuAndElements = new gameElements();
 let gamer = new player(pl_x, pl_y);
 let Boss = new boss(width - 200, 0);
 let bot = new obstacle(width - 485, 35, width / 2, height - 100);
 let bot2 = new obstacle(width - 485, height - 100, width / 2, 100);
-
-
-let ongoingTouches = [];
-let lastx = 0;
-let lasty = 0;
-let dx, dy;
-let startTap = false;
-let touches = [];
-let moveTouch = false;
-
-
-function copyTouch({identifier, pageX, pageY}) {
-    return {identifier, pageX, pageY};
-}
-
-function handleStart(evt) {
-    if (wePlaying) {
-        startTap = true;
-        evt.preventDefault();
-        touches = evt.changedTouches;
-        ongoingTouches.push(copyTouch(touches[0]));
-        lastx = ongoingTouches[0].pageX;
-        lasty = ongoingTouches[0].pageY;
-    }
-}
-
-function handleMove(evt) {
-    if (wePlaying) {
-        startTap = false;
-        evt.preventDefault();
-        if (mobile) {
-            let touches = evt.changedTouches;
-            moveTouch = touches[0];
-            if (moveTouch.pageX - dx > 20 || moveTouch.pageX - dx < -20) {
-                console.log('danger');
-            }
-            dx = -lastx + moveTouch.pageX;
-            dy = -lasty + moveTouch.pageY;
-            touchMove(dx, dy);
-            lastx = moveTouch.pageX;
-            lasty = moveTouch.pageY;
-        }
-    }
-}
-
-function handleEnd(evt) {
-    if (wePlaying) {
-        evt.preventDefault();
-        let touches = evt.changedTouches;
-        for (let i = 0; i < touches.length; i++) {
-            let idx = ongoingTouchIndexById(touches[i].identifier);
-            if (idx >= 0) {
-                ongoingTouches.splice(idx, 1);
-            }
-        }
-    }
-}
-
-function handleCancel(evt) {
-    if (wePlaying) {
-        evt.preventDefault();
-        console.log("touchcancel.");
-        let touches = evt.changedTouches;
-
-        for (let i = 0; i < touches.length; i++) {
-            let idx = ongoingTouchIndexById(touches[i].identifier);
-            ongoingTouches.splice(idx, 1);
-        }
-    }
-}
-
-function ongoingTouchIndexById(idToFind) {
-    for (let i = 0; i < ongoingTouches.length; i++) {
-        let id = ongoingTouches[i].identifier;
-
-        if (id === idToFind) {
-            return i;
-        }
-    }
-    return -1;
-}
-
-function touchMove(dx, dy) {
-
-    if ((gamer.x + dx) < width - 64 && (gamer.x + dx) > 0) {
-        gamer.x += dx;
-        gamer.gunX += dx;
-    }
-    if ((gamer.y + dy) < height - 64 && (gamer.y + dy) > 0) {
-        gamer.y += dy;
-        gamer.gunY += dy;
-    }
-}
 
 
 function gameLoop() {
@@ -711,21 +732,17 @@ function gameLoop() {
         document.body.style.cursor = 'none';
         Boss.drawPortal();
         checkCollision();
+        hitTest();
         drawBullets();
         moveBullets();
         drawEnemies();
         moveEnemies();
-        hitTest();
         if (bossInGame && Boss.lives > 0) {
             moveBoss();
             Boss.draw();
             bot.draw();
             bot2.draw();
-        } else if (gamer.lives > 0 && score >= bossGoal) {
-            enemyTotal = 5;
-            bossInGame = true;
         }
-        if (touch || godMode || mobile) autoShot();
     }
     gameFrequency < 10000 ? gameFrequency++ : gameFrequency = 0;
     setTimeout(gameLoop, 1000 / 60);
@@ -745,6 +762,7 @@ function init() {
     canvas.addEventListener("touchcancel", handleCancel, false);
     canvas.addEventListener("touchmove", handleMove, false);
     gameLoop()
+    resetGame();
 }
 
 window.onload = init;
