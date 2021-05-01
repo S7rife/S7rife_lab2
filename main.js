@@ -8,7 +8,7 @@ let backX = 0, backY = 0, backX2 = backSize = 1890;
 let pl_x = 30, pl_y = height / 2 - 70, score = 0, best_score = 0;
 let shotKey = false, rightKey = false, leftKey = false, upKey = false, downKey = false;
 let bulletsTotal = 20, bullets = [];
-let enemyTotal = 10, enemies = [], en_w = 80, en_h = 80;
+let enemyTotal = 10, enemies = [], en_w = 80;
 let weInSelect = false, weInStart = true, weInLose = false, wePlaying = false;
 let godMode = false, gameFrequency = 0;
 let bossInGame = false, bossGoal = 0;
@@ -272,6 +272,14 @@ class bullet {
         this.attackY = y + (102 / 2);
         this.bul = new Image();
         this.bul.src = 'images/bullet_sprites.png';
+
+        if (godMode){
+            this.bul.src = 'images/bullet_spritesEx1.png';
+        }
+        else if (bossInGame){
+            this.bul.src = 'images/bullet_spritesEx2.png';
+        }
+
         this.curFrame = 0;
         this.frameCount = 10;
         this.srcX = 0;
@@ -284,35 +292,49 @@ class bullet {
             this.curFrame = ++this.curFrame % this.frameCount;
             this.srcX = this.curFrame * this.width;
         }
+
         ctx.drawImage(this.bul, this.srcX, 0, this.width, this.height, this.x, this.y, this.width, this.height);
     }
 }
 
 
 class enemy {
-    constructor(x, y, w, h) {
+    constructor(x, y, x2, y2) {
         this.x = x;
         this.y = y;
-        this.width = w;
-        this.height = h;
+        this.endX = x2;
+        this.endY = y2;
+        this.width = 80;
+        this.height = 80;
         this.lives = 20;
-        this.def = new Image();
-        this.def.src = 'images/enemy_sprites_default.png';
         this.img = new Image();
-        this.img.src = 'images/enemy_sprites.png';
+        this.img.src = 'images/enemy_sprites_default.png';
+        if (bossInGame) this.img.src = 'images/enemy_sprites_boss.png';
         this.curFrame = 0;
         this.frameCount = 6;
         this.srcX = 0;
     }
 
     draw() {
-        let source;
-        bossInGame ? source = this.img : source = this.def;
-        ctx.drawImage(source, this.srcX, 0, this.width, this.height, this.x, this.y, this.width, this.height);
+
+        ctx.drawImage(this.img, this.srcX, 0, this.width, this.height, this.x, this.y, this.width, this.height);
 
         if (gameFrequency % 6 === 0) {
             this.curFrame = ++this.curFrame % this.frameCount;
             this.srcX = this.curFrame * this.width;
+        }
+
+        if (this.x !== this.endX || this.y !== this.endY) {
+            let dx = this.endX - this.x;
+            let dy = this.endY - this.y;
+            let d = Math.sqrt(dx * dx + dy * dy);
+            if (d <= 5) {
+                this.x = this.endX;
+                this.y = this.endY;
+            } else {
+                this.x += 0.5 * dx / d;
+                this.y += 0.5 * dy / d;
+            }
         }
     }
 }
@@ -566,7 +588,7 @@ function moveBullets() {
                 wePlaying = false;
 
             } else {
-                Boss.lives -= 10;
+                Boss.lives -= 5;
                 score += 30;
             }
         }
@@ -585,9 +607,9 @@ function moveEnemies() {
     for (let i = 0; i < enemies.length; i++) {
         if (enemies[i].x >= -en_w) {
             enemies[i].x -= 2;
-        } else if (enemies[i].x < -en_w) {
-            enemies[i].x = width - 150;
-            enemies[i].y = getRandom(100, height - 100);
+        } else if (enemies[i].x < -en_w || enemies[i].y < -en_w ||  enemies[i].y > height) {
+            enemies.splice(i, 1);
+            enemies.push(new enemy(width - 150, getRandom(100, height - 100), -80,getRandom(-1000, height + 1000)));
         }
     }
 }
@@ -617,7 +639,7 @@ function hitTest() {
                         clearInterval(autoShotInterval);
                         autoShotInterval = setInterval(autoShot, 200);
                     }
-                    if (enemies.length < enemyTotal) enemies.push(new enemy(width - 150, getRandom(100, height - 100), en_w, en_h, 20));
+                    if (enemies.length < enemyTotal) enemies.push(new enemy(width - 150, getRandom(100, height - 100), -80,getRandom(-1000, height + 1000)));
                 }
             }
         }
@@ -698,11 +720,11 @@ function resetGame() {
     }
     if (score > best_score) best_score = score;
     godMode = false;
-    bossGoal = getRandom(500, 1000);
+    bossGoal = getRandom(2000, 4000);
     enemies = [];
     enemyTotal = 10;
     for (let i = 0; i < enemyTotal; i++) {
-        enemies.push(new enemy(width + getRandom(en_w, 1000), getRandom(0, height - en_h), en_w, en_h, 20));
+        enemies.push(new enemy(getRandom(width, width + 300), getRandom(100, height - 100), -80,getRandom(-1000, height + 1000)));
     }
     bullets = [];
     Boss.lives = 1000;
@@ -732,27 +754,28 @@ let bot2 = new obstacle(width - 485, height - 100, width / 2, 100);
 
 
 function gameLoop() {
-    gamer.draw();
-    ctx.clearRect(0, 0, width, height);
-    Boss.drawPortal();
     document.body.style.cursor = 'default';
+    ctx.clearRect(0, 0, width, height);
     drawBackground();
+    Boss.drawPortal();
     menuAndElements.draw();
+
     if (wePlaying && gamer.lives > 0) {
         document.body.style.cursor = 'none';
-        checkCollision();
-        hitTest();
-        drawBullets();
-        moveBullets();
-        drawEnemies();
-        moveEnemies();
         if (bossInGame && Boss.lives > 0) {
             moveBoss();
             Boss.draw();
             bot.draw();
             bot2.draw();
         }
+        checkCollision();
+        hitTest();
+        drawEnemies();
+        moveEnemies();
+        drawBullets();
+        moveBullets();
     }
+    gamer.draw();
     gameFrequency < 10000 ? gameFrequency++ : gameFrequency = 0;
     setTimeout(gameLoop, 1000 / 60);
 }
