@@ -720,7 +720,7 @@ function resetGame() {
     }
     if (score > best_score) best_score = score;
     godMode = false;
-    bossGoal = getRandom(2000, 4000);
+    bossGoal = getRandom(2000, 3000);
     enemies = [];
     enemyTotal = 10;
     for (let i = 0; i < enemyTotal; i++) {
